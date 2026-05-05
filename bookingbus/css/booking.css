@@ -1,0 +1,68 @@
+﻿* {
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  --darkblue: #ff6b00;
+  --dark: #111111;
+  --indigo: #6610f2;
+  --gold: #ffbf00;
+  --white: #fff;
+  --black: #000;
+  --border: #0002;
+}
+
+.nav a {
+  color: var(--black);
+  font-weight: 700;
+}
+
+.booking_body {
+  padding: 8em 1em;
+  display: flex;
+  flex-direction: column;
+  text-align: center;
+  gap: 1em;
+  margin-top: -3em;
+}
+
+.booking_cars_table {
+  overflow-x: auto;
+  box-shadow: 0 0 1em 0 var(--border);
+}
+
+.booking_cars_table::-webkit-scrollbar {
+  display: none;
+}
+
+table,
+th,
+td {
+  border: 1px solid var(--border);
+  padding: 0.8em;
+}
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+tr:nth-child(even) {
+  background-color: #f2f2f2;
+}
+
+td a {
+  padding: 0.5em;
+  border: none;
+  border-radius: 0.5em;
+  background-color: var(--darkblue);
+  color: var(--white);
+}
+
+th {
+  background-color: var(--darkblue);
+  color: white;
+}
+

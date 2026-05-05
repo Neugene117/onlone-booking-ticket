@@ -1,0 +1,58 @@
+﻿/* Additional polish for agency/admin tables and utility blocks */
+
+.available_cars_table,
+.agencies_table,
+.agency_cars_table,
+.agency_destination_table,
+.set_transportation_table {
+  margin-bottom: 1rem;
+}
+
+.available_cars_table h1,
+.agencies_table h1,
+.agency_cars_table h1,
+.agency_destination_table h1 {
+  margin: 0;
+  padding: 0.9rem 1rem;
+  font-size: 1.15rem;
+  border-bottom: 1px solid #ffe6d3;
+  color: #1f1f1f;
+}
+
+#cyanerwose {
+  background: #fff;
+  border: 1px solid #ffd9bf;
+  border-radius: 12px;
+  padding: 1rem;
+}
+
+#cyanerwose h1,
+#cyanerwose h2,
+#cyanerwose h3 {
+  color: #1f1f1f;
+}
+
+.agency_cars_creation_form form h2,
+.agency_destination_creation_form form h2,
+.agencies_Creation_form form h2 {
+  color: #1f1f1f;
+}
+
+@media print {
+  .panel-topbar,
+  .admin_aside,
+  .agency_admin_aside,
+  .humburger,
+  .responsive_nav,
+  .chatbot-toggle,
+  .chatbot-box {
+    display: none !important;
+  }
+
+  .admin_container,
+  .agency_admin_container {
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+}
+

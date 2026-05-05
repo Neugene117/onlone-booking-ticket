@@ -1,0 +1,187 @@
+﻿* {
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+  font-family: "Gill Sans", "Gill Sans MT", Calibri, "Trebuchet MS", sans-serif;
+}
+:root {
+  --darkblue: #ff6b00;
+  --dark: #111111;
+  --indigo: #6610f2;
+  --gold: #ffbf00;
+  --white: #fff;
+  --black: #000;
+}
+body {
+  background-color: var(--white);
+}
+html::-webkit-scrollbar-track {
+  background-color: var(--dark);
+}
+
+html::-webkit-scrollbar-thumb {
+  background: var(--gold);
+  border-radius: 15px;
+}
+
+html::-webkit-scrollbar {
+  width: 5px;
+}
+li {
+  list-style-type: none;
+}
+
+a {
+  text-decoration: none;
+  text-transform: capitalize;
+}
+.humburger {
+  display: none;
+}
+/* nav sticky */
+
+.nav-sticky {
+  background-color: var(--darkblue);
+  box-shadow: 0 0 1em #333;
+  height: 50px;
+}
+
+.nav-sticky li a {
+  color: var(--white);
+  font-size: 1rem;
+}
+.nav-sticky .booking-button {
+  border: none;
+  background-color: transparent;
+  color: var(--white);
+  font-size: 1rem;
+  cursor: pointer;
+}
+.nav-sticky li .login-button {
+  border: 1px solid var(--white);
+  border-radius: 10px;
+  background-color: var(--white);
+  padding: 10px 15px;
+  color: var(--dark);
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 1rem;
+}
+.nav-sticky li .login-button:hover {
+  background-color: transparent;
+  color: var(--white);
+  transition: 0.5s ease-in;
+}
+/* before scoll */
+
+nav {
+  position: fixed;
+  top: 0;
+  width: 100%;
+  height: auto;
+  padding: 1em;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-evenly;
+  align-items: center;
+  transition: 0.6s;
+  z-index: 1000;
+  transition: height 1s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+nav li a {
+  color: var(--white);
+  font-size: 1.1rem;
+}
+.booking-button {
+  border: none;
+  background-color: transparent;
+  color: var(--white);
+  font-size: 1.1rem;
+  cursor: pointer;
+}
+nav li .login-button {
+  border: 1px solid var(--darkblue);
+  border-radius: 10px;
+  background-color: var(--darkblue);
+  padding: 10px 15px;
+  color: var(--white);
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 1rem;
+  width: fit-content;
+}
+nav li a:hover,
+.booking-button:hover {
+  color: var(--white);
+  transition: 0.7s ease-in;
+}
+
+nav li a::after,
+.booking-button::after {
+  content: "";
+  width: 0%;
+  height: 2px;
+  background-color: var(--white);
+  display: block;
+  transition: 0.5s;
+}
+nav li a:hover::after,
+.booking-button:hover::after {
+  width: 100%;
+}
+nav li .login-button:hover {
+  background-color: transparent;
+  color: var(--white);
+  transition: 0.5s ease-in;
+}
+/* end of nav */
+
+@media screen and (max-width: 675px) {
+  .nav {
+    display: none;
+  }
+  .humburger {
+    display: block;
+    position: absolute;
+    color: var(--white);
+    right: 1em;
+    top: 0.5em;
+    font-size: 20px;
+    font-weight: 700;
+    background: transparent;
+    border: none;
+    z-index: 2;
+  }
+  .nav-sticky {
+    background-color: transparent;
+  }
+  .nav.active {
+    height: 100vh;
+    top: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 1em;
+    height: 100vh;
+    background-color: var(--darkblue);
+    z-index: 1;
+    transition: height 1s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+  nav li .login-button {
+    border: 1px solid var(--white);
+  border-radius: 10px;
+  background-color: var(--white);
+  padding: 10px 15px;
+  color: var(--dark);
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 1rem;
+  }
+}
+
+@media screen and (max-width: 500px) {
+
+}
+

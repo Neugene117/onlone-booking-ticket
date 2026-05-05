@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="css/style.css" />
+    <link rel="stylesheet" href="css/navbar.css" />
+    <link rel="stylesheet" href="css/footer.css" />
+    <title>Rwanda-Bus || Home page</title>
+    <link
+      href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <button class="humburger">&#9776;</button>
+    <header>
+      <nav class="nav">
+        <li><a href="./index.html">Home</a></li>
+        <li><a href="booking.html">Booking</a></li>
+        <li><a href="#">Contact Us</a></li>
+        <li><button class="login-button">Login</button></li>
+      </nav>
+    </header>
+
+    <section class="home-content">
+      <div class="home-hero">
+        <img src="img/Night-Bus-Travel-Safety-1200x899.jpg" alt="" />
+        <div class="hero-welcome">
+          <h3>Rwanda-<span>Bus</span></h3>
+          <p>
+            explore every edge of Rwanda with<span> us trip</span>
+            anywhere<span> anytime !</span>
+          </p>
+        </div>
+        <div class="home-booking">
+          <div class="home-title">
+            <h2 class="">book a car moving now</h2>
+          </div>
+          <form action="#" method="post">
+            <div class="location">
+              <fieldset>
+                <label for="from">From:</label>
+                <select required name="from">
+                  <option value="">Select a location...</option>
+                  <option value="kigali">kigali</option>
+                  <option value="musanze">musanze</option>
+                  <option value="nyagatare">nyagatare</option>
+                </select>
+              </fieldset>
+              <fieldset>
+                <label for="to">To:</label>
+                <select required name="to">
+                  <option value="">Select a location...</option>
+                  <option value="kigali">kigali</option>
+                  <option value="musanze">musanze</option>
+                  <option value="nyagatare">nyagatare</option>
+                </select>
+              </fieldset>
+            </div>
+
+            <div class="date">
+              <fieldset>
+                <label for="departure">Departure date:</label>
+                <input
+                  name="deparure"
+                  type="date"
+                  class="form-control date"
+                  id="deparure"
+                  placeholder="Select date..."
+                  required
+                />
+              </fieldset>
+              <fieldset>
+                <label for="return">Return date:</label>
+                <input
+                  name="return"
+                  type="date"
+                  class="form-control date"
+                  id="return"
+                  placeholder="Select date..."
+                  required
+                />
+              </fieldset>
+            </div>
+            <div class="butDiv">
+              <button type="submit" id="form-submit" class="order-btn">
+                Order Ticket Now
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <div class="home-available-cars">
+        <h1>Available Now</h1>
+        <div class="available_cars_table">
+          <table>
+            <tr>
+              <th>
+                N<sup><u>o</u></sup>
+              </th>
+              <th>Agency</th>
+              <th>Location</th>
+              <th>Email</th>
+              <th>Tel</th>
+              <th>Get it now</th>
+            </tr>
+            <tr>
+              <td>1</td>
+              <td>Litco</td>
+              <td>Kigali - Musanze</td>
+              <td>litco250@gmail.com</td>
+              <td>0789375245</td>
+              <td><a href="#">Book</a></td>
+            </tr>
+            <tr>
+              <td>2</td>
+              <td>Stella</td>
+              <td>Rusizi - Musanze</td>
+              <td>stella250@gmail.com</td>
+              <td>0789375245</td>
+              <td><a href="#">Book</a></td>
+            </tr>
+            <tr>
+              <td>3</td>
+              <td>Litco</td>
+              <td>Kigali - Musanze</td>
+              <td>litco250@gmail.com</td>
+              <td>0789375245</td>
+              <td><a href="#">Book</a></td>
+            </tr>
+            <tr>
+              <td>4</td>
+              <td>Stella</td>
+              <td>Rusizi - Musanze</td>
+              <td>stella250@gmail.com</td>
+              <td>0789375245</td>
+              <td><a href="#">Book</a></td>
+            </tr>
+            <tr>
+              <td>5</td>
+              <td>Litco</td>
+              <td>Kigali - Musanze</td>
+              <td>litco250@gmail.com</td>
+              <td>0789375245</td>
+              <td><a href="#">Book</a></td>
+            </tr>
+            <tr>
+              <td>6</td>
+              <td>Stella</td>
+              <td>Rusizi - Musanze</td>
+              <td>stella250@gmail.com</td>
+              <td>0789375245</td>
+              <td><a href="#">Book</a></td>
+            </tr>
+          </table>
+        </div>
+      </div>
+
+      <div class="main-home-slide-agency">
+        <h3>clients favorites</h3>
+        <div class="home-slide-agency">
+          <div class="home-slide-track">
+            <div class="agency-card">
+              <img src="img/litco2.jpg" alt="bus one" />
+              <div class="agency-details">
+                <h4>Licto1</h4>
+                <button>explore more</button>
+              </div>
+            </div>
+            <div class="agency-card">
+              <img src="img/litco.jpg" alt="bus one" />
+              <div class="agency-details">
+                <h4>Licto2</h4>
+                <button>explore more</button>
+              </div>
+            </div>
+            <div class="agency-card">
+              <img src="img/licto3.jpg" alt="bus one" />
+              <div class="agency-details">
+                <h4>Licto3</h4>
+                <button>explore more</button>
+              </div>
+            </div>
+            <div class="agency-card">
+              <img src="img/bus.jpg" alt="bus one" />
+              <div class="agency-details">
+                <h4>Licto4</h4>
+                <button>explore more</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <footer class="footer">
+        <div class="footer-container">
+          <div class="footer-contaner-up">
+            <div class="footer-col-holder">
+              <div class="col-footer">
+                <h3>compay</h3>
+                <ul>
+                  <li><a href="#">booking </a></li>
+                  <li><a href="#">agencies</a></li>
+                  <li><a href="#">destinations</a></li>
+                  <li><a href="#">routes</a></li>
+                  <li><a href="#">working days</a></li>
+                </ul>
+              </div>
+              <div class="col-footer">
+                <h3>Useful links</h3>
+                <ul>
+                  <li><a href="#">book now</a></li>
+                  <li><a href="#">reach to us</a></li>
+                  <li><a href="#">be a paterner</a></li>
+                </ul>
+              </div>
+            </div>
+
+            <div class="footer-col-holder">
+              <div class="col-footer footer-display-none">
+                <h3>our services</h3>
+                <ul>
+                  <li><a href="#">new cars</a></li>
+                  <li><a href="#">our services</a></li>
+                </ul>
+              </div>
+              <div class="col-footer">
+                <h3>news letter</h3>
+                <div class="footer-form">
+                  <h4>Updates and Offers.</h4>
+                  <form action="#" class="subscribe" method="post">
+                    <input
+                      type="email"
+                      name="email"
+                      placeholder="Email Address"
+                      required=""
+                    />
+                    <button type="submit">Go</button>
+                  </form>
+                  <p>
+                    Write us your email and keep you updated on new tours and
+                    places.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="footer-line"></div>
+          <div class="footer-container-down">
+            <div class="footer-text-left">
+              <p>2024 codebook All rights reserved !</p>
+            </div>
+            <ul class="footer-social">
+              <li>
+                <a href="#facebook"><i class="bx bxl-facebook-circle"></i></a>
+              </li>
+              <li>
+                <a href="#linkedin"><i class="bx bxl-linkedin"></i></a>
+              </li>
+              <li>
+                <a href="#twitter"
+                  ><box-icon type="logo" name="twitter"></box-icon
+                ></a>
+              </li>
+              <li>
+                <a href="#google"><i class="bx bxl-gmail"></i></a>
+              </li>
+              <li>
+                <a href="#github"><i class="bx bxl-github"></i></a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </footer>
+    </section>
+
+    <script src="js/scroll.js"></script>
+  </body>
+</html>
