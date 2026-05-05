@@ -28,6 +28,20 @@ if ($companyLogo !== '') {
         $companyLogoPath = $companyLogo;
     }
 }
+
+$reportDate = isset($_GET['report_date']) ? trim((string)$_GET['report_date']) : '';
+$reportDateFrom = isset($_GET['report_from']) ? trim((string)$_GET['report_from']) : '';
+$reportDateTo = isset($_GET['report_to']) ? trim((string)$_GET['report_to']) : '';
+
+if ($reportDate !== '' && !preg_match('/^\d{4}-\d{2}-\d{2}$/', $reportDate)) {
+    $reportDate = '';
+}
+if ($reportDateFrom !== '' && !preg_match('/^\d{4}-\d{2}-\d{2}$/', $reportDateFrom)) {
+    $reportDateFrom = '';
+}
+if ($reportDateTo !== '' && !preg_match('/^\d{4}-\d{2}-\d{2}$/', $reportDateTo)) {
+    $reportDateTo = '';
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -315,26 +329,46 @@ while($car=mysqli_fetch_assoc($showCars)){
       }
       //start balance
       else if(isset($_GET['balance'])){
-       $ss=" SELECT booking.B_Id,booking.P_Names,booking.P_Phone,booking.P_Email, 
-       cars_to_leave.Time_to_leave,cars.Car_Plaque,company.C_Id ,locations.L_from,
-        locations.L_to,SUM(locations.price * booking.Seat_Count) as totalamount FROM cars_to_leave INNER JOIN booking ON
-         cars_to_leave.id=booking.Id INNER JOIN cars ON cars.Car_Id=cars_to_leave.Car_Id
-          INNER JOIN company ON company.C_Id=cars.C_Id inner join destination on
-           destination.D_Id=cars_to_leave.D_Id inner join locations on 
-           locations.L_id=destination.L_id WHERE company.C_Id='$user_id' AND booking.activityi='activated'";
-           $qw=mysqli_query($con,$ss);
-           if(mysqli_num_rows($qw)>0){
-        while($tt=mysqli_fetch_array($qw)){
-          if($tt['totalamount']>0){
-          echo "<h1 style='color:orange;'><center>Total Amount = ".$tt['totalamount']." RWF </center></h1>";
-          }
-          else{
-            echo "<h1 style='color:orange;'><center> Total Balance = 0 RWF</center></h1>";
-          }
-        }}
-        else{
-          echo "<h1 style='color:orange;'><center>Balance = 0</center></h1>";
-        }
+       $dateCondition = "";
+       if ($reportDateFrom !== '') {
+          $from = mysqli_real_escape_string($con, $reportDateFrom);
+          $dateCondition .= " AND DATE(cars_to_leave.date_car_to) >= '$from'";
+       }
+       if ($reportDateTo !== '') {
+          $to = mysqli_real_escape_string($con, $reportDateTo);
+          $dateCondition .= " AND DATE(cars_to_leave.date_car_to) <= '$to'";
+       }
+
+       $ss=" SELECT COALESCE(SUM(locations.price * booking.Seat_Count),0) as totalamount
+             FROM cars_to_leave
+             INNER JOIN booking ON cars_to_leave.id=booking.Id
+             INNER JOIN cars ON cars.Car_Id=cars_to_leave.Car_Id
+             INNER JOIN company ON company.C_Id=cars.C_Id
+             INNER JOIN destination ON destination.D_Id=cars_to_leave.D_Id
+             INNER JOIN locations ON locations.L_id=destination.L_id
+             WHERE company.C_Id='$user_id' AND booking.activityi='activated' $dateCondition";
+       $qw=mysqli_query($con,$ss);
+       $balanceValue = 0;
+       if($qw && mysqli_num_rows($qw)>0){
+          $tt = mysqli_fetch_assoc($qw);
+          $balanceValue = (int)$tt['totalamount'];
+       }
+?>
+      <div class="report-toolbar">
+        <form method="get" class="report-filter-form">
+          <input type="hidden" name="balance" value="">
+          <label for="report_from">From</label>
+          <input type="date" id="report_from" name="report_from" value="<?php echo htmlspecialchars($reportDateFrom); ?>">
+          <label for="report_to">To</label>
+          <input type="date" id="report_to" name="report_to" value="<?php echo htmlspecialchars($reportDateTo); ?>">
+          <button type="submit" class="agency_send_button">Apply</button>
+        </form>
+        <a href="agency_panel?balance" class="report-clear-link">Clear Filter</a>
+      </div>
+      <div class="report-summary">
+        <h1>Total Amount: <?php echo number_format($balanceValue); ?> RWF</h1>
+      </div>
+<?php
       }
       //end of balance
       //Start To Showing clients
@@ -1007,7 +1041,7 @@ if(mysqli_num_rows($allDrivers)>0){
         else if(isset($_GET['add_car_to_leave'])){
 ?>
           <div class="agency_cars_creation_form">
-          <form action="brain2" method="post">
+          <form action="brain2" method="post" id="carToLeaveForm" novalidate>
             <h1><u>Add Car To Leave</u></h1>
             <select name="C_id" style="text-transform: capitalize;cursor: pointer;" required>
               <option style="background-color: black;color: white;font-size: 1.8em;" value="" selected disabled>Select Plaque</option>
@@ -1043,19 +1077,28 @@ if(mysqli_num_rows($allDestinations)>0){
 <?php
 }
 ?>
-            </select>
-            <div>
-            Hours
-<input type="number" id="hr" name="hr"  min="0" max="12" required />
-Minutes
-<input type="number" id="mn" name="min"  min="0" max="60" required />
-choose(AM/PM)
-   <select name="ap" id="" required>
-  <option value="" disabled selected>select time</option>
-  <option value="AM">AM</option>
-  <option value="PM">PM</option>
-   </select>
-</div>
+</select>
+            <label for="travel_date">Departure Date</label>
+            <input type="date" id="travel_date" name="travel_date" min="<?php echo date('Y-m-d'); ?>" required />
+            <div class="inline-time-fields">
+              <div>
+                <label for="hr">Hour</label>
+                <input type="number" id="hr" name="hr" min="1" max="12" required />
+              </div>
+              <div>
+                <label for="mn">Minutes</label>
+                <input type="number" id="mn" name="min" min="0" max="59" required />
+              </div>
+              <div>
+                <label for="ap">AM / PM</label>
+                <select name="ap" id="ap" required>
+                  <option value="" disabled selected>Select</option>
+                  <option value="AM">AM</option>
+                  <option value="PM">PM</option>
+                </select>
+              </div>
+            </div>
+            <small class="form-note">Tip: If the selected time has passed today, pick a future date.</small>
 
             <input type="submit" name="add_tleave_car" class="agency_send_button" value="Add"/>
           </form>
@@ -1248,30 +1291,42 @@ function gusubiraInyuma() {
       else if (isset($_GET["drivers_report"])) {
 ?>
 <title>Rwanda-Bus || Drivers Report</title>
-<table>
-<td style="border: 1px solid white;">
-  <a onclick="birashoboka()" >PRINT</a>
-</td>
-</table>
+<div class="report-toolbar">
+  <form method="get" class="report-filter-form">
+    <input type="hidden" name="drivers_report" value="">
+    <label for="drivers_report_date">Date</label>
+    <input type="date" id="drivers_report_date" name="report_date" value="<?php echo htmlspecialchars($reportDate); ?>">
+    <button type="submit" class="agency_send_button">Apply</button>
+  </form>
+  <div class="report-toolbar-actions">
+    <a href="agency_panel?drivers_report" class="report-clear-link">Clear Filter</a>
+    <a href="#" onclick="birashoboka(); return false;">Print</a>
+  </div>
+</div>
 <div id="cyanerwose">
         <center><h1><span style="background-color: black;color: white;border-radius: 3px;">Ritco</span> <u>(Reports Of Drivers)</u></h1></center>
         <br><div class="agency_cars_table">
 <?php
-  $totalCars = mysqli_query($con, "SELECT COUNT(Emp_Id) AS total FROM employeers WHERE C_Id='$user_id'") or die(mysqli_error($con));
+  $driverDateFilter = '';
+  if ($reportDate !== '') {
+    $safeReportDate = mysqli_real_escape_string($con, $reportDate);
+    $driverDateFilter = " AND DATE(ct.date_car_to) = '$safeReportDate'";
+  }
+  $totalCars = mysqli_query($con, "SELECT COUNT(DISTINCT e.Emp_Id) AS total FROM employeers e LEFT JOIN cars c ON c.Emp_Id=e.Emp_Id LEFT JOIN cars_to_leave ct ON ct.Car_Id=c.Car_Id WHERE e.C_Id='$user_id' $driverDateFilter") or die(mysqli_error($con));
   $Cars = mysqli_fetch_assoc($totalCars);
-  echo "<span style='font-size: 1.3em;'><b>All Drivers:</b> " . $Cars['total']."</span><br>";
+  echo "<span style='font-size: 1.05em;'><b>Drivers:</b> " . (int)$Cars['total'] . (($reportDate !== '') ? " on " . htmlspecialchars($reportDate) : "") . "</span><br>";
 ?>
         <div class="agency_cars_table">
           <table>
         <?php
-        $kureba_abashoferi = mysqli_query($con,"SELECT * FROM employeers WHERE C_Id='$user_id'") or die(mysqli_error($con));
+        $kureba_abashoferi = mysqli_query($con,"SELECT DISTINCT e.* FROM employeers e LEFT JOIN cars c ON c.Emp_Id=e.Emp_Id LEFT JOIN cars_to_leave ct ON ct.Car_Id=c.Car_Id WHERE e.C_Id='$user_id' $driverDateFilter ORDER BY e.Emp_Fname ASC, e.Emp_Lname ASC") or die(mysqli_error($con));
         if (mysqli_num_rows($kureba_abashoferi)>0) {
         ?>
         <tr>
-          <th style="border: 3px solid #111111;">N<sup><u>o</u></sup></th>
-          <th style="border: 3px solid #111111;">Driver Names</th>
-          <th style="border: 3px solid #111111;">Driver phone number</th>
-          <th style="border: 3px solid #111111;">Phone national identity</th>
+          <th>N<sup><u>o</u></sup></th>
+          <th>Driver Names</th>
+          <th>Driver phone number</th>
+          <th>Phone national identity</th>
         </tr>
         <?php
           $count = 0;
@@ -1279,19 +1334,25 @@ function gusubiraInyuma() {
             $count++;
         ?>
             <tr>
-              <td style="border: 2px solid #111111;"><?php echo $count; ?></td>
-              <td style="border: 2px solid #111111;"><?php echo $yose=$shoferi["Emp_Fname"]." ".$shoferi["Emp_Lname"] ?></td>
-              <td style="border: 2px solid #111111;"><?php echo $phoneYe=$shoferi["Emp_Phone"]; ?></td>
-              <td style="border: 2px solid #111111;"><?php echo $shoferi["Emp_Idcard"]; ?></td>
+              <td><?php echo $count; ?></td>
+              <td><?php echo $shoferi["Emp_Fname"]." ".$shoferi["Emp_Lname"] ?></td>
+              <td><?php echo $shoferi["Emp_Phone"]; ?></td>
+              <td><?php echo $shoferi["Emp_Idcard"]; ?></td>
             </tr>
         <?php
           }
+        } else {
+?>
+        <tr>
+          <td colspan="4">No drivers found for the selected date.</td>
+        </tr>
+<?php
         }
         ?>
           </table>
-                  </form>
                 </div>
         </div>
+</div>
 <?php
       }
       //End Driver report
@@ -1299,30 +1360,42 @@ function gusubiraInyuma() {
       else if (isset($_GET["cars_report"])) {
     ?>
     <title>Rwanda-Bus || Cars Report</title>
-    <table>
-    <td style="border: 1px solid white;">
-      <a onclick="birashoboka()" >PRINT</a>
-    </td>
-    </table>
+    <div class="report-toolbar">
+      <form method="get" class="report-filter-form">
+        <input type="hidden" name="cars_report" value="">
+        <label for="cars_report_date">Date</label>
+        <input type="date" id="cars_report_date" name="report_date" value="<?php echo htmlspecialchars($reportDate); ?>">
+        <button type="submit" class="agency_send_button">Apply</button>
+      </form>
+      <div class="report-toolbar-actions">
+        <a href="agency_panel?cars_report" class="report-clear-link">Clear Filter</a>
+        <a href="#" onclick="birashoboka(); return false;">Print</a>
+      </div>
+    </div>
     <div id="cyanerwose">
             <center><h1><span style="background-color: black;color: white;border-radius: 3px;">Ritco</span> <u>(Reports Of Cars)</u></h1></center>
             <br><div class="agency_cars_table">
     <?php
-      $totalCars = mysqli_query($con, "SELECT COUNT(Car_Id) AS total FROM cars WHERE C_Id='$user_id'") or die(mysqli_error($con));
+      $carsDateFilter = '';
+      if ($reportDate !== '') {
+        $safeReportDate = mysqli_real_escape_string($con, $reportDate);
+        $carsDateFilter = " AND DATE(ct.date_car_to) = '$safeReportDate'";
+      }
+      $totalCars = mysqli_query($con, "SELECT COUNT(DISTINCT c.Car_Id) AS total FROM cars c LEFT JOIN cars_to_leave ct ON ct.Car_Id=c.Car_Id WHERE c.C_Id='$user_id' $carsDateFilter") or die(mysqli_error($con));
       $Cars = mysqli_fetch_assoc($totalCars);
-      echo "<span style='font-size: 1.3em;'><b>All Cars:</b> " . $Cars['total']."</span><br>";
+      echo "<span style='font-size: 1.05em;'><b>Cars:</b> " . (int)$Cars['total'] . (($reportDate !== '') ? " on " . htmlspecialchars($reportDate) : "") . "</span><br>";
     ?>
     <table>
     <?php
-    $showCars=mysqli_query($con,"SELECT C.*,E.* FROM cars C, employeers E WHERE E.Emp_Id=C.Emp_Id AND E.C_Id='$user_id' AND C.C_Id='$user_id' ORDER BY Car_Plaque ASC") or die(mysqli_error($con));
+    $showCars=mysqli_query($con,"SELECT DISTINCT C.*,E.* FROM cars C INNER JOIN employeers E ON E.Emp_Id=C.Emp_Id LEFT JOIN cars_to_leave ct ON ct.Car_Id=C.Car_Id WHERE E.C_Id='$user_id' AND C.C_Id='$user_id' $carsDateFilter ORDER BY Car_Plaque ASC") or die(mysqli_error($con));
     if (mysqli_num_rows($showCars)>0){
     ?>
                 <tr>
-                  <th style="border: 3px solid #111111;">N<sup><u>o</u></sup></th>
-                  <th style="border: 3px solid #111111;">Plate number</th>
-                  <th style="border: 3px solid #111111;">Seats number</th>
-                  <th style="border: 3px solid #111111;">Driver Name</th>
-                  <th style="border: 3px solid #111111;">Driver Phone Number</th>
+                  <th>N<sup><u>o</u></sup></th>
+                  <th>Plate number</th>
+                  <th>Seats number</th>
+                  <th>Driver Name</th>
+                  <th>Driver Phone Number</th>
                 </tr>
     <?php
     $count = 0;
@@ -1330,19 +1403,24 @@ function gusubiraInyuma() {
       $count++;
     ?>
                 <tr>
-                  <td style="border: 2px solid #111111;"><?php echo $count; ?></td>
-                  <td style="border: 2px solid #111111;"><?php echo $car["Car_Plaque"]; ?></td>
-                  <td style="border: 2px solid #111111;"><?php echo $car["Number_Place"]; ?></td>
-                  <td style="border: 2px solid #111111;"><?php echo $car["Emp_Fname"]." ".$car["Emp_Lname"]; ?></td>
-                  <td style="border: 2px solid #111111;"><?php echo $car["Emp_Phone"]; ?></td>
+                  <td><?php echo $count; ?></td>
+                  <td><?php echo $car["Car_Plaque"]; ?></td>
+                  <td><?php echo $car["Number_Place"]; ?></td>
+                  <td><?php echo $car["Emp_Fname"]." ".$car["Emp_Lname"]; ?></td>
+                  <td><?php echo $car["Emp_Phone"]; ?></td>
                 </tr>
     <?php
     }
+    } else {
+?>
+                <tr>
+                  <td colspan="5">No cars found for the selected date.</td>
+                </tr>
+<?php
     }
     ?>
               </table>
-                      </form>
-                    </div>
+            </div>
     </div>
     <?php
           }
@@ -1351,41 +1429,59 @@ function gusubiraInyuma() {
           else if (isset($_GET["destinations_report"])) {
     ?>
     <title>Rwanda-Bus || Destinations Report</title>
-    <table>
-    <td style="border: 1px solid white;">
-      <a onclick="birashoboka()" >PRINT</a>
-    </td>
-    </table>
+    <div class="report-toolbar">
+      <form method="get" class="report-filter-form">
+        <input type="hidden" name="destinations_report" value="">
+        <label for="dest_report_date">Date</label>
+        <input type="date" id="dest_report_date" name="report_date" value="<?php echo htmlspecialchars($reportDate); ?>">
+        <button type="submit" class="agency_send_button">Apply</button>
+      </form>
+      <div class="report-toolbar-actions">
+        <a href="agency_panel?destinations_report" class="report-clear-link">Clear Filter</a>
+        <a href="#" onclick="birashoboka(); return false;">Print</a>
+      </div>
+    </div>
     <div id="cyanerwose">
             <center><h1><span style="background-color: black;color: white;border-radius: 3px;">Ritco</span> <u>(Reports Of Destinations)</u></h1></center>
             <br>
             <div class="agency_destination_table">
     <?php
-      $totalCars = mysqli_query($con, "SELECT COUNT(D_Id) AS total FROM destination WHERE C_Id='$user_id'") or die(mysqli_error($con));
+      $destDateFilter = '';
+      if ($reportDate !== '') {
+        $safeReportDate = mysqli_real_escape_string($con, $reportDate);
+        $destDateFilter = " AND DATE(ct.date_car_to) = '$safeReportDate'";
+      }
+      $totalCars = mysqli_query($con, "SELECT COUNT(DISTINCT D.D_Id) AS total FROM destination D LEFT JOIN cars_to_leave ct ON ct.D_Id=D.D_Id WHERE D.C_Id='$user_id' $destDateFilter") or die(mysqli_error($con));
       $Cars = mysqli_fetch_assoc($totalCars);
-      echo "<span style='font-size: 1.3em;'><b>All Destinations:</b> " . $Cars['total']."</span><br>";
+      echo "<span style='font-size: 1.05em;'><b>Destinations:</b> " . (int)$Cars['total'] . (($reportDate !== '') ? " on " . htmlspecialchars($reportDate) : "") . "</span><br>";
     ?>
               <table>
     <?php
-    $showMydestinations=mysqli_query($con,"SELECT D.*,L.* FROM destination D,locations L WHERE L.L_id=D.L_id AND D.C_Id='$user_id' ORDER BY L_from ASC") or die($con);
+    $showMydestinations=mysqli_query($con,"SELECT DISTINCT D.*,L.* FROM destination D INNER JOIN locations L ON L.L_id=D.L_id LEFT JOIN cars_to_leave ct ON ct.D_Id=D.D_Id WHERE D.C_Id='$user_id' $destDateFilter ORDER BY L_from ASC") or die($con);
     if (mysqli_num_rows($showMydestinations)>0) {
       $count=1;
     ?>
                 <tr>
-                  <th style="border: 3px solid #111111;">N<sup><u>o</u></sup></th>
-                  <th style="border: 3px solid #111111;">Destinations</th>
-                  <th style="border: 3px solid #111111;">Price</th>
+                  <th>N<sup><u>o</u></sup></th>
+                  <th>Destinations</th>
+                  <th>Price</th>
                 </tr>
     <?php
     while ($myDestination=mysqli_fetch_assoc($showMydestinations)){
     ?>
                 <tr>
-                  <td style="border: 2px solid #111111;"><?php echo $count++ ?></td>
-                  <td style="text-transform: capitalize;border: 2px solid #111111;"><?php echo $ikiCyerekezo=$myDestination["L_from"]." - ".$myDestination["L_to"]; ?></td>
-                  <td style="border: 2px solid #111111;">Rwf <?php echo $myDestination["price"]; ?></td>
+                  <td><?php echo $count++ ?></td>
+                  <td style="text-transform: capitalize;"><?php echo $myDestination["L_from"]." - ".$myDestination["L_to"]; ?></td>
+                  <td>Rwf <?php echo $myDestination["price"]; ?></td>
                 </tr>
     <?php
       }
+    } else {
+?>
+                <tr>
+                  <td colspan="3">No destinations found for the selected date.</td>
+                </tr>
+<?php
     }
     ?>
               </table>
@@ -1439,70 +1535,57 @@ if(mysqli_num_rows($allDestinations)>0){
             destination.D_Id = cars_to_leave.D_Id INNER JOIN employeers ON
              employeers.Emp_Id = cars.Emp_Id INNER JOIN locations 
              ON locations.L_id = destination.L_id INNER JOIN company ON company.C_Id = destination.C_Id
-              WHERE company.C_Id = '$user_id'ORDER BY CASE WHEN SUBSTRING(Time_to_leave,LOCATE(' ', Time_to_leave) + 1, 2) = 'AM' THEN 0 ELSE 1 END ASC, STR_TO_DATE(Time_to_leave, '%l:%i %p') ASC;
-           ";
+              WHERE company.C_Id = '$user_id' ORDER BY cars_to_leave.date_car_to ASC";
            $quer=mysqli_query($con,$se);
+           $now = new DateTime();
            ?>
              <div class="agencies_table">
               <h1><center>Car To Leave</center></h1>
           <table>
             <tr>
-              <th>
-                N<sup><u>o</u></sup>
-              </th>
+              <th>N<sup><u>o</u></sup></th>
               <th>Plaque</th>
               <th>Place</th>
               <th>Drivers</th>
               <th>Tel</th>
-              <th>location</th>
+              <th>Location</th>
               <th>Time</th>
               <th>Date</th>
-              <th>Timing</th>
-              
+              <th>Status</th>
             </tr>
             <?php
             $count=0;
             while($row=mysqli_fetch_array($quer)){
+              $departureAt = DateTime::createFromFormat('Y-m-d h:i A', date('Y-m-d', strtotime($row['date_car_to'])) . ' ' . trim($row['Time_to_leave']));
+              if (!$departureAt) {
+                continue;
+              }
               $count++;
-
-  $isahaIbitswe=$row["Time_to_leave"];
-
-  
-  $iyiSaha=date("h:i A");
-  $dateTime2 = new DateTime($iyiSaha);
-  $time24_1 = $isahaIbitswe;
-  $suzuma = $dateTime2->format('H:i');
-  if(substr($suzuma,0,2)>12){
-    $n = substr($suzuma,0,2)-12;
-    $f="PM";
-    $time24_2 = $n."".$dateTime2->format(':i')." ".$f;
-  } else {
-    $m="AM";
-    $time24_2 = $dateTime2->format('H:i')."".$m;
-
-  }
- 
-  $igihe=substr($row["date_car_to"], 0, 10);
-  $uyuMunsi=date("Y-m-d");
-  if ($uyuMunsi<=$igihe && $time24_1>$time24_2) { 
-?>
+              $isPast = $departureAt < $now;
+            ?>
               <tr>
               <td><?php echo $count; ?></td>
               <td><?php echo $row['Car_Plaque']; ?></td>
               <td><?php echo $row['Number_Place'];?></td>
-              <td><?php echo $row['Emp_Fname']."&nbsp;&nbsp;&nbsp;".$row['Emp_Lname']; ?></td>
+              <td><?php echo $row['Emp_Fname']." ".$row['Emp_Lname']; ?></td>
               <td><?php echo $row['Emp_Phone'] ?></td>
-              <td><?php echo $row['L_from']."-".$row['L_to']; ?></td>
+              <td><?php echo $row['L_from']." - ".$row['L_to']; ?></td>
               <td><?php echo $row['Time_to_leave'];?></td>
-              <td><?php echo $row['date_car_to']; ?></td>
-              <td>Journey</td>
+              <td><?php echo date('Y-m-d', strtotime($row['date_car_to'])); ?></td>
+              <td>
+                <span class="status-pill <?php echo $isPast ? 'status-past' : 'status-upcoming'; ?>">
+                  <?php echo $isPast ? 'Departed' : 'Upcoming'; ?>
+                </span>
+              </td>
               </tr>
 <?php
-  } 
-  // else {
-  //   echo '<script>alert("there is no car available now.")</script>';
-  //   // echo '<script>location.href="agency_panel?dashboard"</script>';
-  // }
+            }
+            if ($count === 0) {
+?>
+            <tr>
+              <td colspan="9">No scheduled departures found.</td>
+            </tr>
+<?php
             }
 ?>
        </table>
@@ -1603,29 +1686,142 @@ if(mysqli_num_rows($allDestinations)>0){
       }                
 </script>
 <script>
-        function validatePassword() {
-            var newPassword = document.getElementById("ibanga2");
-            var confirmPassword = document.getElementById("ibanga3");
-            
-            if (!newPassword || !confirmPassword) {
-                console.error("Password fields not found");
-                return false;
-            }
-            
-            if (newPassword.value !== confirmPassword.value) {
-                alert("New password and confirm new password do not match.");
-                return false;
-            }
-            return true;
+    function validatePassword() {
+      var newPassword = document.getElementById("ibanga2");
+      var confirmPassword = document.getElementById("ibanga3");
+      if (!newPassword || !confirmPassword) return true;
+      if (newPassword.value !== confirmPassword.value) {
+        alert("New password and confirm new password do not match.");
+        return false;
+      }
+      return true;
+    }
+
+    function togglePasswordVisibility() {
+      const passwordFields = document.querySelectorAll('#ibanga1, #ibanga2, #ibanga3');
+      passwordFields.forEach(field => {
+        if (!field) return;
+        field.type = field.type === 'password' ? 'text' : 'password';
+      });
+    }
+
+    function getCarToLeaveDateTime() {
+      const dateInput = document.getElementById('travel_date');
+      const hourInput = document.getElementById('hr');
+      const minuteInput = document.getElementById('mn');
+      const amPmInput = document.getElementById('ap');
+      if (!dateInput || !hourInput || !minuteInput || !amPmInput) return null;
+
+      const dateVal = dateInput.value;
+      const hour = parseInt(hourInput.value, 10);
+      const minute = parseInt(minuteInput.value, 10);
+      const ampm = amPmInput.value;
+      if (!dateVal || Number.isNaN(hour) || Number.isNaN(minute) || !ampm) return null;
+
+      let hour24 = hour % 12;
+      if (ampm === 'PM') hour24 += 12;
+      const dt = new Date(dateVal + 'T00:00:00');
+      dt.setHours(hour24, minute, 0, 0);
+      return dt;
+    }
+
+    function setFieldError(field, message) {
+      if (!field) return;
+      field.classList.add('invalid-field');
+      let helper = field.nextElementSibling;
+      if (!helper || !helper.classList.contains('field-error')) {
+        helper = document.createElement('small');
+        helper.className = 'field-error';
+        field.insertAdjacentElement('afterend', helper);
+      }
+      helper.textContent = message;
+    }
+
+    function clearFieldError(field) {
+      if (!field) return;
+      field.classList.remove('invalid-field');
+      const helper = field.nextElementSibling;
+      if (helper && helper.classList.contains('field-error')) {
+        helper.remove();
+      }
+    }
+
+    function validateField(field) {
+      if (!field || field.type === 'hidden' || field.type === 'button' || field.type === 'submit') return true;
+      clearFieldError(field);
+
+      if (field.hasAttribute('required') && !String(field.value || '').trim()) {
+        setFieldError(field, 'This field is required.');
+        return false;
+      }
+
+      if (field.name === 'Number_Place') {
+        const seats = parseInt(field.value, 10);
+        if (Number.isNaN(seats) || seats <= 0) {
+          setFieldError(field, 'Seats must be a positive number.');
+          return false;
         }
-        function togglePasswordVisibility() {
-            const passwordFields = document.querySelectorAll('#ibanga1, #ibanga2, #ibanga3');
-            passwordFields.forEach(field => {
-                if (!field) return;
-                field.type = field.type === 'password' ? 'text' : 'password';
-            });
-        }
-    </script>
+      }
+
+      if (!field.checkValidity()) {
+        setFieldError(field, field.title || 'Please enter a valid value.');
+        return false;
+      }
+      return true;
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+      const forms = document.querySelectorAll('.agency_admin_container form');
+      forms.forEach(function (form) {
+        const fields = form.querySelectorAll('input, select, textarea');
+        fields.forEach(function (field) {
+          field.addEventListener('input', function () {
+            validateField(field);
+          });
+          field.addEventListener('change', function () {
+            validateField(field);
+          });
+        });
+
+        form.addEventListener('submit', function (event) {
+          let isValid = true;
+          let firstInvalid = null;
+          fields.forEach(function (field) {
+            const ok = validateField(field);
+            if (!ok && !firstInvalid) {
+              firstInvalid = field;
+            }
+            isValid = isValid && ok;
+          });
+
+          if (form.id === 'carToLeaveForm') {
+            const departureAt = getCarToLeaveDateTime();
+            if (!departureAt) {
+              isValid = false;
+            } else {
+              const now = new Date();
+              if (departureAt <= now) {
+                isValid = false;
+                const dateInput = document.getElementById('travel_date');
+                setFieldError(dateInput, 'Please choose a future departure date/time.');
+                if (!firstInvalid) firstInvalid = dateInput;
+              }
+            }
+          }
+
+          if (form.querySelector('#ibanga2') && form.querySelector('#ibanga3') && !validatePassword()) {
+            isValid = false;
+            firstInvalid = firstInvalid || form.querySelector('#ibanga2');
+          }
+
+          if (!isValid) {
+            event.preventDefault();
+            if (firstInvalid && typeof firstInvalid.focus === 'function') firstInvalid.focus();
+          }
+        });
+      });
+    });
+</script>
 <script>
     const agencyProfileMenu = document.querySelector(".profile-menu");
     const agencyProfileTrigger = document.querySelector(".profile-trigger");

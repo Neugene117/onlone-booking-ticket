@@ -55,6 +55,25 @@ function fetchUpcomingTrips($con, $limit = null)
     return $rows;
 }
 
+function fetchSingleCount($con, $sql, $key)
+{
+    $result = mysqli_query($con, $sql);
+    if ($result && $row = mysqli_fetch_assoc($result)) {
+        return (int)($row[$key] ?? 0);
+    }
+    return 0;
+}
+
+function fetchPlatformStats($con)
+{
+    return [
+        'routes' => fetchSingleCount($con, "SELECT COUNT(*) AS count_value FROM locations", 'count_value'),
+        'agencies' => fetchSingleCount($con, "SELECT COUNT(*) AS count_value FROM company", 'count_value'),
+        'departures_today' => fetchSingleCount($con, "SELECT COUNT(*) AS count_value FROM cars_to_leave WHERE DATE(date_car_to) = CURDATE()", 'count_value'),
+        'tickets_booked' => fetchSingleCount($con, "SELECT COUNT(*) AS count_value FROM booking", 'count_value'),
+    ];
+}
+
 $pageTitle = 'Rwanda-Bus || Home';
 if (isset($_GET['injira'])) {
     $pageTitle = 'Rwanda-Bus || Login';
@@ -74,9 +93,9 @@ if (isset($_GET['injira'])) {
     <link rel="stylesheet" href="css/navbar.css" />
     <link rel="stylesheet" href="css/footer.css" />
     <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet"/>
-    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;700&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
   </head>
-  <body>
+  <body class="<?php echo isset($_GET['injira']) || isset($_GET['ijambobangaRyange']) || isset($_GET['iyandikishe']) ? 'auth-page' : 'home-page'; ?>">
 
     <button class="hamburger" id="hamburger" aria-label="Open menu">
       <span></span><span></span><span></span>
@@ -223,35 +242,47 @@ if (isset($_GET['injira'])) {
       </div>
 
     <?php else: ?>
+      <?php
+      $platformStats = fetchPlatformStats($con);
+      $upcomingRows = fetchUpcomingTrips($con, 5);
+      $allCompanies = mysqli_query($con,"SELECT * FROM company ORDER BY C_Name ASC") or die(mysqli_error($con));
+      ?>
+
       <section class="hero-section">
-        <div class="hero-bg">
-          <img src="img/Night-Bus-Travel-Safety-1200x899.jpg" alt="Bus travel in Rwanda" class="hero-img"/>
-          <div class="hero-overlay"></div>
-        </div>
+        <div class="hero-bg-pattern"></div>
+        <div class="hero-glow hero-glow-one"></div>
+        <div class="hero-glow hero-glow-two"></div>
         <div class="hero-content">
           <div class="hero-text animate-fade-in">
-            <div class="hero-badge">Rwanda's Bus Network</div>
-            <h1 class="hero-title">Travel<br/><span>Rwanda</span><br/>Your Way</h1>
-            <p class="hero-desc">Book your bus ticket in seconds. Travel safely to every corner of Rwanda anytime, anywhere.</p>
-            <div class="hero-stats">
-              <div class="stat"><strong>50+</strong><span>Routes</span></div>
-              <div class="stat-div"></div>
-              <div class="stat"><strong>20+</strong><span>Agencies</span></div>
-              <div class="stat-div"></div>
-              <div class="stat"><strong>Daily</strong><span>Departures</span></div>
+            <span class="hero-kicker">Fast Bus Booking</span>
+            <h1 class="hero-title">Book Bus Tickets<br/><span>Across Rwanda</span></h1>
+            <p class="hero-desc">Find your route, pick a trusted company, and reserve your seat in minutes.</p>
+            <div class="hero-actions">
+              <a href="booking" class="hero-btn hero-btn-primary">Book Your Trip</a>
+              <a href="#upcomingBuses" class="hero-btn hero-btn-ghost">See Departures</a>
+            </div>
+            <div class="hero-trust">
+              <span><i class='bx bx-shield-quarter'></i> Secure Booking</span>
+              <span><i class='bx bx-time-five'></i> Fast Checkout</span>
             </div>
           </div>
 
           <div class="booking-widget animate-slide-left">
             <div class="widget-header">
-              <h2>Find Your Bus</h2>
-              <p>Select your route below</p>
+              <h2>Find Available Buses</h2>
+              <p>Choose your origin and destination</p>
+            </div>
+            <div class="widget-metrics">
+              <div><strong><?php echo number_format($platformStats['routes']); ?>+</strong><span>Routes</span></div>
+              <div><strong><?php echo number_format($platformStats['agencies']); ?>+</strong><span>Agencies</span></div>
+              <div><strong><?php echo number_format($platformStats['departures_today']); ?></strong><span>Today</span></div>
+              <div><strong><?php echo number_format($platformStats['tickets_booked']); ?>+</strong><span>Tickets</span></div>
             </div>
             <form action="controller" method="post" class="booking-form">
               <div class="form-row">
                 <div class="form-field">
                   <label for="from"><i class='bx bx-map'></i> From</label>
-                  <select name="crazyFrom" required>
+                  <select id="from" name="crazyFrom" required>
                     <option value="" selected disabled>Select origin...</option>
                     <?php
                     $origins = mysqli_query($con,"SELECT DISTINCT L_from FROM locations ORDER BY L_from ASC") or die(mysqli_error($con));
@@ -261,10 +292,10 @@ if (isset($_GET['injira'])) {
                     ?>
                   </select>
                 </div>
-                <div class="swap-icon" id="swapBtn" title="Swap">?</div>
+                <div class="swap-icon" id="swapBtn" title="Swap routes"><i class='bx bx-transfer-alt'></i></div>
                 <div class="form-field">
                   <label for="to"><i class='bx bx-map-pin'></i> To</label>
-                  <select name="crazyTo" required>
+                  <select id="to" name="crazyTo" required>
                     <option value="" selected disabled>Select destination...</option>
                     <?php
                     $destinations = mysqli_query($con,"SELECT DISTINCT L_to FROM locations ORDER BY L_to ASC") or die(mysqli_error($con));
@@ -282,20 +313,38 @@ if (isset($_GET['injira'])) {
             </form>
           </div>
         </div>
+      </section>
 
-        <div class="scroll-hint">
-          <span>Scroll</span>
-          <div class="scroll-line"></div>
+      <section class="features-section">
+        <div class="section-header">
+          <h2>Why Travelers Choose RwandaBus</h2>
+          <p>Everything is organized to help customers book quickly and confidently.</p>
+        </div>
+        <div class="features-grid">
+          <article class="feature-card">
+            <i class='bx bx-layer'></i>
+            <h3>Clear Options</h3>
+            <p>Compare routes, prices, and departure times in one organized interface.</p>
+          </article>
+          <article class="feature-card">
+            <i class='bx bx-check-shield'></i>
+            <h3>Trusted Agencies</h3>
+            <p>Book only with registered companies and reach them easily when needed.</p>
+          </article>
+          <article class="feature-card">
+            <i class='bx bx-mobile-alt'></i>
+            <h3>Mobile Friendly</h3>
+            <p>Enjoy the same smooth booking experience on phones, tablets, and desktops.</p>
+          </article>
         </div>
       </section>
 
-      <section class="cars-section">
+      <section class="cars-section" id="upcomingBuses">
         <div class="section-header">
-          <h2>First Available Buses</h2>
-          <p>The next 5 departures based on current time</p>
+          <h2>Next Available Departures</h2>
+          <p>The first 5 upcoming buses with open seats.</p>
         </div>
 
-        <?php $upcomingRows = fetchUpcomingTrips($con, 5); ?>
         <?php if(count($upcomingRows)>0): ?>
         <div class="buses-grid">
           <?php foreach($upcomingRows as $index => $r): ?>
@@ -342,18 +391,15 @@ if (isset($_GET['injira'])) {
         <div class="no-buses">
           <div class="no-buses-icon">BUS</div>
           <h3>No buses available right now</h3>
-          <p>Check back soon for upcoming departures</p>
+          <p>Check back soon for upcoming departures.</p>
         </div>
         <?php endif; ?>
       </section>
 
-      <?php
-      $allCompanies = mysqli_query($con,"SELECT * FROM company ORDER BY C_Name ASC") or die(mysqli_error($con));
-      ?>
       <section class="agencies-section">
         <div class="section-header">
-          <h2>All Bus Companies</h2>
-          <p>Search and open available tickets for a specific company</p>
+          <h2>Explore Bus Companies</h2>
+          <p>Search by company name, phone number, or CEO and open tickets instantly.</p>
         </div>
 
         <div class="company-search-wrap">
@@ -368,13 +414,17 @@ if (isset($_GET['injira'])) {
              data-company-name="<?php echo strtolower($company['C_Name']); ?>"
              data-company-phone="<?php echo strtolower($company['C_Phone']); ?>"
              data-company-ceo="<?php echo strtolower($company['C_Ceo']); ?>">
-            <div class="company-logo-wrap">
-              <img class="company-logo" src="<?php echo htmlspecialchars($company['C_Logo']); ?>" alt="<?php echo htmlspecialchars($company['C_Name']); ?>" onerror="this.onerror=null;this.src='dashborad-image.PNG';" />
+            <div class="company-card-image">
+              <div class="company-logo-wrap">
+                <img class="company-logo" src="<?php echo htmlspecialchars($company['C_Logo']); ?>" alt="<?php echo htmlspecialchars($company['C_Name']); ?>" onerror="this.onerror=null;this.src='dashborad-image.PNG';" />
+              </div>
             </div>
-            <div class="company-body">
-              <h3><?php echo htmlspecialchars($company['C_Name']); ?></h3>
-              <p><i class='bx bx-phone'></i> <?php echo htmlspecialchars($company['C_Phone']); ?></p>
-              <p><i class='bx bx-user'></i> CEO: <?php echo htmlspecialchars($company['C_Ceo']); ?></p>
+            <div class="company-card-content">
+              <div class="company-body">
+                <h3><?php echo htmlspecialchars($company['C_Name']); ?></h3>
+                <p><i class='bx bx-phone'></i> <?php echo htmlspecialchars($company['C_Phone']); ?></p>
+                <p><i class='bx bx-user'></i> CEO: <?php echo htmlspecialchars($company['C_Ceo']); ?></p>
+              </div>
               <span class="company-link">View Tickets <i class='bx bx-right-arrow-alt'></i></span>
             </div>
           </a>
@@ -453,4 +503,3 @@ if (isset($_GET['injira'])) {
     <script src="js/chatbot.js"></script>
   </body>
 </html>
-

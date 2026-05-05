@@ -594,17 +594,43 @@ function car_to_leale(){
   if(isset($_POST['add_tleave_car'])){
     $cd=mysqli_real_escape_string($con, htmlspecialchars($_POST['C_id']));
     $destin=mysqli_real_escape_string($con, htmlspecialchars($_POST['c_destination']));
-    $hr=mysqli_real_escape_string($con, htmlspecialchars($_POST['hr']));
-    $mn=mysqli_real_escape_string($con, htmlspecialchars($_POST['min']));
+    $hr=(int)mysqli_real_escape_string($con, htmlspecialchars($_POST['hr']));
+    $mn=(int)mysqli_real_escape_string($con, htmlspecialchars($_POST['min']));
     $ap=mysqli_real_escape_string($con, htmlspecialchars($_POST['ap']));
-    $tim=$hr.":".$mn." ".$ap;
-    $i="INSERT INTO cars_to_leave VALUES(NULL,'$cd','$destin','$tim',NULL,NULL)";
+    $travelDate = mysqli_real_escape_string($con, htmlspecialchars($_POST['travel_date']));
+
+    $isValidDate = preg_match('/^\d{4}-\d{2}-\d{2}$/', $travelDate);
+    $isValidTime = in_array($ap, array('AM', 'PM'), true) && $hr >= 1 && $hr <= 12 && $mn >= 0 && $mn <= 59;
+
+    $tim = sprintf('%d:%02d %s', $hr, $mn, $ap);
+    $departureAt = DateTime::createFromFormat('Y-m-d h:i A', $travelDate . ' ' . $tim);
+    $now = new DateTime();
+
+    if(!$isValidDate || !$isValidTime || !$departureAt || $departureAt <= $now){
+?>
+      <div class="agency_cars_creation_form" style="margin-top: 5em;">
+      <form>
+        <h2>Please choose a valid future departure date and time.</h2>
+        <input type="button" class="agency_send_button" value="BACK" onclick="gusubiraInyuma()">
+      </form>
+      </div>
+      <script>
+      function gusubiraInyuma() {
+        location.href="agency_panel?add_car_to_leave";
+      }
+      </script>
+<?php
+      return;
+    }
+
+    $departureDateTime = $departureAt->format('Y-m-d H:i:s');
+    $i="INSERT INTO cars_to_leave (id, Car_Id, D_Id, Time_to_leave, date_car_to, timing) VALUES (NULL,'$cd','$destin','$tim','$departureDateTime',NULL)";
     $q=mysqli_query($con,$i);
     if($q==true){
       ?>
       <div class="agency_cars_creation_form" style="margin-top: 5em;">
       <form>
-      <h2>Car To leav Already Are <br>Successful!  <span style="text-transform: capitalize;background-color: black;color: white;border-radius: 3px;">
+      <h2>Car to leave schedule created successfully.</h2>
         <input type="button" class="agency_send_button" value="CONTINUE" onclick="gusubiraInyuma()">
       </form>
       </div>
@@ -617,7 +643,19 @@ function car_to_leale(){
       <?php
     }
     else{
-      echo "Data are not inserted";
+?>
+      <div class="agency_cars_creation_form" style="margin-top: 5em;">
+      <form>
+        <h2>Failed to save departure. Please try again.</h2>
+        <input type="button" class="agency_send_button" value="BACK" onclick="gusubiraInyuma()">
+      </form>
+      </div>
+      <script>
+      function gusubiraInyuma() {
+        location.href="agency_panel?add_car_to_leave";
+      }
+      </script>
+<?php
     }
     
   }

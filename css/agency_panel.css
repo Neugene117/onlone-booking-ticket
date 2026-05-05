@@ -24,6 +24,7 @@
   border: 1px solid #ffd9bf;
   border-radius: 12px;
   padding: 1rem;
+  box-shadow: 0 8px 22px rgba(139, 65, 7, 0.09);
 }
 
 #cyanerwose h1,
@@ -36,6 +37,10 @@
 .agency_destination_creation_form form h2,
 .agencies_Creation_form form h2 {
   color: #1f1f1f;
+}
+
+#cyanerwose table {
+  margin-top: 0.8rem;
 }
 
 @media print {

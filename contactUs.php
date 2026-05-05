@@ -27,24 +27,70 @@
     </header>
 
     <section class="contact-page">
-      <div class="contact-card">
-        <h1>Contact Us</h1>
-        <p>Have questions? Send us a message and we will help quickly.</p>
-        <form id="contact-form" method="POST" action="brain">
-          <label for="name">Name</label>
-          <input type="text" id="name" name="nam" required />
+      <div class="contact-bg-orb orb-one"></div>
+      <div class="contact-bg-orb orb-two"></div>
 
-          <label for="email">Email</label>
-          <input type="email" id="email" name="email" required />
+      <div class="contact-shell">
+        <div class="contact-intro animate-rise">
+          <span class="contact-kicker">Customer Support</span>
+          <h1>Let’s Help You Travel With Confidence</h1>
+          <p>Share your question and our team will respond as quickly as possible with the right support.</p>
 
-          <label for="subject">Subject</label>
-          <input type="text" id="subject" name="subject" required />
+          <div class="contact-info-grid">
+            <article class="contact-info-card">
+              <i class='bx bx-phone-call'></i>
+              <div>
+                <h3>Call Us</h3>
+                <p>0789117044</p>
+              </div>
+            </article>
+            <article class="contact-info-card">
+              <i class='bx bx-envelope'></i>
+              <div>
+                <h3>Email</h3>
+                <p>support@rwandabus.rw</p>
+              </div>
+            </article>
+            <article class="contact-info-card">
+              <i class='bx bx-time-five'></i>
+              <div>
+                <h3>Working Hours</h3>
+                <p>Mon - Sat, 7:00 AM - 9:00 PM</p>
+              </div>
+            </article>
+          </div>
+        </div>
 
-          <label for="message">Message</label>
-          <textarea id="message" name="message" rows="5" required></textarea>
+        <div class="contact-card animate-rise delay-sm">
+          <h2>Send a Message</h2>
+          <p>Complete the form below and we will get back to you shortly.</p>
+          <form id="contact-form" method="POST" action="brain">
+            <div class="input-group">
+              <label for="name">Name</label>
+              <input type="text" id="name" name="nam" placeholder="Your full name" required />
+            </div>
 
-          <button type="submit" name="feed">Send Message</button>
-        </form>
+            <div class="input-group">
+              <label for="email">Email</label>
+              <input type="email" id="email" name="email" placeholder="you@example.com" required />
+            </div>
+
+            <div class="input-group">
+              <label for="subject">Subject</label>
+              <input type="text" id="subject" name="subject" placeholder="How can we help?" required />
+            </div>
+
+            <div class="input-group">
+              <label for="message">Message</label>
+              <textarea id="message" name="message" rows="5" placeholder="Write your message..." required></textarea>
+            </div>
+
+            <button type="submit" name="feed">
+              Send Message
+              <i class='bx bx-send'></i>
+            </button>
+          </form>
+        </div>
       </div>
     </section>
 

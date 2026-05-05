@@ -113,7 +113,7 @@ if (isset($_GET['selectedLocation'])) {
       $tripId = (int)$_GET['booking_form'];
       $tripSql = "SELECT ct.id, ct.Time_to_leave, ct.date_car_to, cr.Car_Plaque, cr.Number_Place,
                          lc.L_from, lc.L_to, lc.price,
-                         cp.C_Id, cp.C_Name, cp.C_Phone,
+                         cp.C_Id, cp.C_Name, cp.C_Phone, cp.C_Logo,
                          COALESCE(SUM(b.Seat_Count), 0) AS seats_taken
                   FROM cars_to_leave ct
                   INNER JOIN cars cr ON cr.Car_Id = ct.Car_Id
@@ -123,7 +123,7 @@ if (isset($_GET['selectedLocation'])) {
                   LEFT JOIN booking b ON b.Id = ct.id
                   WHERE ct.id = '$tripId'
                   GROUP BY ct.id, ct.Time_to_leave, ct.date_car_to, cr.Car_Plaque, cr.Number_Place,
-                           lc.L_from, lc.L_to, lc.price, cp.C_Id, cp.C_Name, cp.C_Phone";
+                           lc.L_from, lc.L_to, lc.price, cp.C_Id, cp.C_Name, cp.C_Phone, cp.C_Logo";
       $tripResult = mysqli_query($con, $tripSql);
       $trip = mysqli_fetch_assoc($tripResult);
     ?>
@@ -142,31 +142,46 @@ if (isset($_GET['selectedLocation'])) {
       }
     ?>
     <section class="booking-form-all">
-      <div class="booking-form">
+      <div class="booking-ticket-shell">
         <div class="booking-car-details">
+          <div class="ticket-topline">
+            <span class="ticket-eyebrow">Digital Ticket</span>
+            <a href="booking" class="ticket-back-link"><i class='bx bx-left-arrow-alt'></i> Back to departures</a>
+          </div>
+
           <div class="booking-car-info">
-            <div class="car-infoo">
-              <p><?php echo htmlspecialchars($trip['C_Name']); ?></p>
-              <p><?php echo htmlspecialchars($trip['Car_Plaque']); ?></p>
+            <div class="ticket-company">
+              <div class="ticket-logo-wrap">
+                <img src="<?php echo htmlspecialchars(!empty($trip['C_Logo']) ? $trip['C_Logo'] : 'dashborad-image.PNG'); ?>" alt="<?php echo htmlspecialchars($trip['C_Name']); ?> logo" onerror="this.onerror=null;this.src='dashborad-image.PNG';" />
+              </div>
+              <div class="ticket-company-meta">
+                <h2><?php echo htmlspecialchars($trip['C_Name']); ?></h2>
+                <p><i class='bx bx-id-card'></i> <?php echo htmlspecialchars($trip['Car_Plaque']); ?></p>
+                <p><i class='bx bx-phone'></i> <?php echo htmlspecialchars($trip['C_Phone']); ?></p>
+              </div>
             </div>
-            <div class="car-info">
-              <p>FROM: <?php echo htmlspecialchars($trip['L_from']); ?></p>
-              <p>TO: <?php echo htmlspecialchars($trip['L_to']); ?></p>
-              <p>TIME: <?php echo htmlspecialchars($trip['Time_to_leave']); ?></p>
-              <p>PRICE: <?php echo number_format((int)$trip['price']); ?> RWF</p>
+            <div class="ticket-seats-pill <?php echo $seatsLeft <= 5 ? 'low' : ''; ?>">
+              <?php echo (int)$seatsLeft; ?> seats left
             </div>
           </div>
 
+          <div class="ticket-route-grid">
+            <div class="ticket-chip"><span>From</span><strong><?php echo htmlspecialchars($trip['L_from']); ?></strong></div>
+            <div class="ticket-chip"><span>To</span><strong><?php echo htmlspecialchars($trip['L_to']); ?></strong></div>
+            <div class="ticket-chip"><span>Departure</span><strong><?php echo htmlspecialchars($trip['Time_to_leave']); ?></strong></div>
+            <div class="ticket-chip"><span>Price</span><strong><?php echo number_format((int)$trip['price']); ?> RWF</strong></div>
+          </div>
+
           <?php if ($seatsLeft > 0 && !$isExpired): ?>
-          <form action="brain" method="post">
+          <form action="brain" method="post" class="ticket-form">
             <fieldset>
-              <label>Name:</label>
+              <label>Name</label>
               <input type="text" name="price" value="<?php echo (int)$trip['price']; ?>" readonly hidden>
               <input type="text" name="C_Phone" value="<?php echo htmlspecialchars($trip['C_Phone']); ?>" readonly hidden>
               <input type="text" name="P_name" placeholder="Full names" required />
             </fieldset>
             <fieldset>
-              <label>Phone:</label>
+              <label>Phone</label>
               <input
                 type="tel"
                 name="phone"
@@ -179,11 +194,11 @@ if (isset($_GET['selectedLocation'])) {
               <input type="text" name="idd" value="<?php echo (int)$trip['id'];?>" readonly hidden>
             </fieldset>
             <fieldset>
-              <label>Email:</label>
+              <label>Email</label>
               <input type="email" name="email" placeholder="example@mail.com" required />
             </fieldset>
             <fieldset>
-              <label>Select Seat:</label>
+              <label>Select Seat</label>
               <div class="seat-picker">
                 <?php $requiredSeat = true; ?>
                 <?php for ($seat = 1; $seat <= (int)$trip['Number_Place']; $seat++): ?>
@@ -234,8 +249,15 @@ if (isset($_GET['selectedLocation'])) {
 
     <section class="booking-page">
       <div class="booking-hero">
-        <h1>Available Buses</h1>
-        <p>Book by route or open tickets for a specific company.</p>
+        <div class="booking-hero-text">
+          <span class="booking-tag">Live Departures</span>
+          <h1>Choose the Best Bus for Your Route</h1>
+          <p>Browse updated trips, compare options, and continue to secure ticket booking.</p>
+        </div>
+        <div class="booking-hero-stat">
+          <span>Trips Found</span>
+          <strong><?php echo count($upcomingTrips); ?></strong>
+        </div>
       </div>
 
       <?php if ($selectedCompanyName): ?>
