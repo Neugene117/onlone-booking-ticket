@@ -5,6 +5,21 @@ if (!isset($_SESSION['7pdB7689Gf4jkgjkgyggjGFJKHYHkiopu66789403'])) {
     echo '<script>location.href="index"</script>';
     exit;
 } 
+
+$adminLogoPath = '';
+$adminLogoAlt = 'Company';
+$adminLogoQuery = mysqli_query($con, "SELECT C_Name, C_Logo FROM company WHERE C_Checking='activated' ORDER BY C_Id ASC LIMIT 1");
+if ($adminLogoQuery && mysqli_num_rows($adminLogoQuery) > 0) {
+    $adminLogoData = mysqli_fetch_assoc($adminLogoQuery);
+    $adminLogoAlt = $adminLogoData['C_Name'];
+    $candidateLogo = trim((string)$adminLogoData['C_Logo']);
+    if ($candidateLogo !== '') {
+        $candidateFsPath = __DIR__ . DIRECTORY_SEPARATOR . str_replace(array('/', '\\'), DIRECTORY_SEPARATOR, $candidateLogo);
+        if (file_exists($candidateFsPath)) {
+            $adminLogoPath = $candidateLogo;
+        }
+    }
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -26,14 +41,13 @@ if (!isset($_SESSION['7pdB7689Gf4jkgjkgyggjGFJKHYHkiopu66789403'])) {
       <aside class="admin_aside">
         <h1>Admin</h1>
         <div class="admin_links">
-          <a href="admin_panel?"><i class='bx bxs-dashboard'></i> Dashboard</a>
-          <a href="admin_panel?activeted_agency"><i class='bx bxs-badge-check'></i> Activated Agency</a>
-          <a href="admin_panel?pending_agency"><i class='bx bxs-time-five'></i> Pending Agency</a>
-          <a href="admin_panel?deactiv_agency"><i class='bx bxs-block'></i> Deactivated Agency</a>
-          <a href="admin_panel?locations"><i class='bx bx-map'></i> Add Locations</a>
-          <a href="admin_panel?locations_nam"><i class='bx bx-edit-alt'></i> Manage Locations</a>
-          <a href="admin_panel?fedback"><i class='bx bxs-message-detail'></i> Feedback</a>
-          <a href="logout"><i class='bx bx-log-out'></i> Sign out</a>
+          <a href="admin_panel?" class="sidebar-item"><i class='bx bxs-dashboard'></i> Dashboard</a>
+          <a href="admin_panel?activeted_agency" class="sidebar-item"><i class='bx bxs-badge-check'></i> Activated Agency</a>
+          <a href="admin_panel?pending_agency" class="sidebar-item"><i class='bx bxs-time-five'></i> Pending Agency</a>
+          <a href="admin_panel?deactiv_agency" class="sidebar-item"><i class='bx bxs-block'></i> Deactivated Agency</a>
+          <a href="admin_panel?locations" class="sidebar-item"><i class='bx bx-map'></i> Add Locations</a>
+          <a href="admin_panel?locations_nam" class="sidebar-item"><i class='bx bx-edit-alt'></i> Manage Locations</a>
+          <a href="admin_panel?fedback" class="sidebar-item"><i class='bx bxs-message-detail'></i> Feedback</a>
         </div>
       </aside>
       <div class="admin_container">
@@ -42,9 +56,22 @@ if (!isset($_SESSION['7pdB7689Gf4jkgjkgyggjGFJKHYHkiopu66789403'])) {
             <i class='bx bx-menu-alt-left'></i>
             <strong>NUWO NI UWACU HUB</strong>
           </div>
-          <div class="panel-topbar-right">
-            <i class='bx bx-user-circle'></i>
-            <span>admin</span>
+          <div class="panel-topbar-right profile-menu">
+            <button type="button" class="profile-trigger" aria-expanded="false">
+              <span class="profile-avatar<?php echo $adminLogoPath !== '' ? ' has-logo' : ''; ?>">
+                <?php if ($adminLogoPath !== '') { ?>
+                  <img src="<?php echo htmlspecialchars($adminLogoPath); ?>" alt="<?php echo htmlspecialchars($adminLogoAlt); ?> logo">
+                <?php } else { ?>
+                  <i class='bx bx-user-circle'></i>
+                <?php } ?>
+              </span>
+              <span>admin</span>
+              <i class='bx bx-chevron-down profile-caret'></i>
+            </button>
+            <div class="profile-dropdown">
+              <a href="admin_panel?change_password"><i class='bx bx-lock'></i> Change Password</a>
+              <a href="logout"><i class='bx bx-log-out'></i> Sign out</a>
+            </div>
           </div>
         </header>
         <section class="panel-overview">
@@ -829,6 +856,59 @@ else{
           resBut.innerHTML = "&#9776;";
           sidebar.classList.remove("active");
         }
+      });
+
+      const profileMenu = document.querySelector(".profile-menu");
+      const profileTrigger = document.querySelector(".profile-trigger");
+      if (profileMenu && profileTrigger) {
+        profileTrigger.addEventListener("click", function (event) {
+          event.stopPropagation();
+          profileMenu.classList.toggle("open");
+          this.setAttribute("aria-expanded", profileMenu.classList.contains("open") ? "true" : "false");
+        });
+
+        document.addEventListener("click", function (event) {
+          if (!profileMenu.contains(event.target)) {
+            profileMenu.classList.remove("open");
+            profileTrigger.setAttribute("aria-expanded", "false");
+          }
+        });
+      }
+    </script>
+    <script>
+      // Sidebar dropdown toggle functionality
+      document.addEventListener('DOMContentLoaded', function() {
+        const dropdowns = document.querySelectorAll('.admin_links .dropdown');
+        
+        dropdowns.forEach(dropdown => {
+          const dropbtn = dropdown.querySelector('.dropbtn');
+          
+          if (dropbtn) {
+            dropbtn.addEventListener('click', function(e) {
+              e.preventDefault();
+              e.stopPropagation();
+              
+              // Close all other dropdowns
+              dropdowns.forEach(other => {
+                if (other !== dropdown) {
+                  other.classList.remove('active');
+                }
+              });
+              
+              // Toggle current dropdown
+              dropdown.classList.toggle('active');
+            });
+          }
+        });
+        
+        // Close dropdowns when clicking outside
+        document.addEventListener('click', function(e) {
+          if (!e.target.closest('.admin_links')) {
+            dropdowns.forEach(dropdown => {
+              dropdown.classList.remove('active');
+            });
+          }
+        });
       });
     </script>
     <script src="js/chatbot.js"></script>

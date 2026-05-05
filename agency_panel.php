@@ -19,6 +19,15 @@ if (mysqli_num_rows($get_user_id) > 0) {
     echo '<script>location.href="signout"</script>';
     exit;
 }
+
+$companyLogoPath = '';
+$companyLogo = trim((string)$user_info['C_Logo']);
+if ($companyLogo !== '') {
+    $companyLogoFsPath = __DIR__ . DIRECTORY_SEPARATOR . str_replace(array('/', '\\'), DIRECTORY_SEPARATOR, $companyLogo);
+    if (file_exists($companyLogoFsPath)) {
+        $companyLogoPath = $companyLogo;
+    }
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -40,66 +49,77 @@ if (mysqli_num_rows($get_user_id) > 0) {
       <aside class="agency_admin_aside">
         <h1>Agency</h1>
         
-<div class="agency_admin_links">
-  <a href="agency_panel?dashboard"><i class='bx bxs-dashboard'></i> Dashboard</a>
-    <div class="dropdown">
-        <div class="dropbtn"><i class='bx bx-bar-chart-alt-2'></i> Reports  &#9662;</div>
-        <div class="dropdown-content">
-            <a href="agency_panel?drivers_report">Drivers Report</a>
-            <a href="agency_panel?cars_report">Cars Report</a>
-            <a href="agency_panel?balance">Balance Report</a>
-            <a href="agency_panel?destinations_report">Destinations Report</a>
-        </div>
-    </div>
+        <div class="agency_admin_links">
+          <a href="agency_panel?dashboard" class="sidebar-item"><i class='bx bxs-dashboard'></i> Dashboard</a>
+          
+          <div class="sidebar-item dropdown">
+            <div class="dropbtn"><i class='bx bx-bar-chart-alt-2'></i> Reports <span class="dropdown-arrow">›</span></div>
+            <div class="dropdown-content">
+              <a href="agency_panel?drivers_report">Drivers Report</a>
+              <a href="agency_panel?cars_report">Cars Report</a>
+              <a href="agency_panel?balance">Balance Report</a>
+              <a href="agency_panel?destinations_report">Destinations Report</a>
+            </div>
+          </div>
 
-    <div class="dropdown">
-        <div class="dropbtn"><i class='bx bx-id-card'></i> Drivers  &#9662;</div>
-        <div class="dropdown-content">
-            <a href="agency_panel?drivers">Show Drivers</a>
-            <a href="agency_panel?add_drivers">Add New Driver</a>
-        </div>
-    </div>
+          <div class="sidebar-item dropdown">
+            <div class="dropbtn"><i class='bx bx-id-card'></i> Drivers <span class="dropdown-arrow">›</span></div>
+            <div class="dropdown-content">
+              <a href="agency_panel?drivers">Show Drivers</a>
+              <a href="agency_panel?add_drivers">Add New Driver</a>
+            </div>
+          </div>
 
-    <div class="dropdown">
-        <div class="dropbtn"><i class='bx bxs-bus'></i> Cars  &#9662;</div>
-        <div class="dropdown-content">
-            <a href="agency_panel?cars">Show Cars</a>
-            <a href="agency_panel?add_cars">Add New Car</a>
-            <a href="agency_panel?show_car_to_leave">Show Car to Leave</a>
-            <a href="agency_panel?add_car_to_leave">Add Car to Leave</a>
-        </div>
-    </div>
+          <div class="sidebar-item dropdown">
+            <div class="dropbtn"><i class='bx bxs-bus'></i> Cars <span class="dropdown-arrow">›</span></div>
+            <div class="dropdown-content">
+              <a href="agency_panel?cars">Show Cars</a>
+              <a href="agency_panel?add_cars">Add New Car</a>
+              <a href="agency_panel?show_car_to_leave">Show Car to Leave</a>
+              <a href="agency_panel?add_car_to_leave">Add Car to Leave</a>
+            </div>
+          </div>
 
-    <div class="dropdown">
-        <div class="dropbtn"><i class='bx bx-map'></i> Destinations  &#9662;</div>
-        <div class="dropdown-content">
-            <a href="agency_panel?destinations">Show Destinations</a>
-            <a href="agency_panel?add_destinations">Add New Destination</a>
-        </div>
-    </div>
+          <div class="sidebar-item dropdown">
+            <div class="dropbtn"><i class='bx bx-map'></i> Destinations <span class="dropdown-arrow">›</span></div>
+            <div class="dropdown-content">
+              <a href="agency_panel?destinations">Show Destinations</a>
+              <a href="agency_panel?add_destinations">Add New Destination</a>
+            </div>
+          </div>
 
-    <div class="dropdown">
-        <div class="dropbtn"><i class='bx bxs-user-detail'></i> Clients  &#9662;</div>
-        <div class="dropdown-content">
-            <a href="agency_panel?clients">Clients Pending</a>
-            <a href="agency_panel?clients_paid">Clients Paid</a>
+          <div class="sidebar-item dropdown">
+            <div class="dropbtn"><i class='bx bxs-user-detail'></i> Clients <span class="dropdown-arrow">›</span></div>
+            <div class="dropdown-content">
+              <a href="agency_panel?clients">Clients Pending</a>
+              <a href="agency_panel?clients_paid">Clients Paid</a>
+            </div>
+          </div>
         </div>
-    </div>
-
-    <a href="agency_panel?change_password"><i class='bx bx-lock'></i> Change Password</a>
-    <a href="signout"><i class='bx bx-log-out'></i> Sign Out</a>
-</div>
       </aside>
       
       <div class="agency_admin_container">
         <header class="panel-topbar">
           <div class="panel-topbar-left">
             <i class='bx bx-menu-alt-left'></i>
-            <strong>NUWO NI UWACU HUB</strong>
+            <strong>RWANDA BUSS</strong>
           </div>
-          <div class="panel-topbar-right">
-            <i class='bx bx-user-circle'></i>
-            <span><?php echo htmlspecialchars($user_info["C_Name"]); ?></span>
+          <div class="panel-topbar-right profile-menu">
+            <button type="button" class="profile-trigger" aria-expanded="false">
+              <span class="profile-avatar<?php echo $companyLogoPath !== '' ? ' has-logo' : ''; ?>">
+                <?php if ($companyLogoPath !== '') { ?>
+                  <img src="<?php echo htmlspecialchars($companyLogoPath); ?>" alt="<?php echo htmlspecialchars($user_info["C_Name"]); ?> logo">
+                <?php } else { ?>
+                  <i class='bx bx-user-circle'></i>
+                <?php } ?>
+              </span>
+              <span><?php echo htmlspecialchars($user_info["C_Name"]); ?></span>
+              <i class='bx bx-chevron-down profile-caret'></i>
+            </button>
+            <div class="profile-dropdown">
+              <a href="agency_panel?change_password"><i class='bx bx-lock'></i> Change Password</a>
+              <a href="signout"><i class='bx bx-log-out'></i> Sign out</a>
+            </div>
           </div>
         </header>
         <section class="panel-overview">
@@ -150,10 +170,12 @@ if (mysqli_num_rows($get_user_id) > 0) {
     <form action="brain2" method="post" onsubmit="return validatePassword()">
         <h1><u>Change Password</u></h1>
         <input type="password" id="ibanga1" name="ibanga1" placeholder="Current password" required/>
-        <input type="password" id="ibanga2" placeholder="New password" required/>
+        <input type="password" id="ibanga2" name="ibanga2" placeholder="New password" required/>
         <input type="password" id="ibanga3" name="ibanga3" placeholder="Confirm new password" required/>
-        <input type="checkbox" id="showPasswords" onclick="togglePasswordVisibility()"> Show Passwords
-        <br>
+        <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+            <input type="checkbox" id="showPasswords" onchange="togglePasswordVisibility()"> 
+            <span>Show Passwords</span>
+        </label>
         <input type="submit" name="hinduraIbanga" class="agency_send_button" value="Change"/>
     </form>
 </div>
@@ -205,8 +227,9 @@ if (mysqli_num_rows($showCars)>0){
               <th>Actions</th>
             </tr>
 <?php
+$count = 0;
 while($car=mysqli_fetch_assoc($showCars)){
-  @$count++;
+  $count++;
 ?>
             <tr>
               <td><?php echo $count; ?></td>
@@ -263,8 +286,9 @@ if (mysqli_num_rows($showCars)>0){
               <th>Actions</th>
             </tr>
 <?php
+$count = 0;
 while($car=mysqli_fetch_assoc($showCars)){
-  @$count++;
+  $count++;
 ?>
             <tr>
               <td><?php echo $count; ?></td>
@@ -652,8 +676,9 @@ $sel="SELECT booking.B_Id,booking.P_Names,booking.P_Phone,booking.P_Email,
 <?php
 $allDrivers=mysqli_query($con,"SELECT * FROM employeers WHERE C_Id='$user_id'") or die(mysqli_error($con));
 if(mysqli_num_rows($allDrivers)>0){
+  $count = 0;
   while($driver=mysqli_fetch_assoc($allDrivers)){
-    @$count++;
+    $count++;
 ?>
               <option value="<?php echo $driver['Emp_Id']; ?>" style="background-color: rgb(255, 107, 0);color: black;font-size: 1.4em;border: 2px solid black;"><?php echo "(".$count."). ".$driver["Emp_Phone"]." (".$driver["Emp_Fname"]." ".$driver["Emp_Lname"].")"; ?></option>
 <?php
@@ -711,8 +736,9 @@ if(mysqli_num_rows($allDrivers)>0){
 <?php
 $allDrivers=mysqli_query($con,"SELECT * FROM employeers WHERE C_Id='$user_id'") or die(mysqli_error($con));
 if(mysqli_num_rows($allDrivers)>0){
+  $count = 0;
   while($driver=mysqli_fetch_assoc($allDrivers)){
-    @$count++;
+    $count++;
 ?>
               <option value="<?php echo $driver['Emp_Id']; ?>" style="background-color: rgb(255, 107, 0);color: black;font-size: 1.4em;border: 2px solid black;"><?php echo "(".$count."). ".$driver["Emp_Phone"]." (".$driver["Emp_Fname"]." ".$driver["Emp_Lname"].")"; ?></option>
 <?php
@@ -851,11 +877,12 @@ else if(isset($_GET["delDriver"])){
           <th>Action</th>
         </tr>
 <?php
+$count = 0;
 while ($shoferi=mysqli_fetch_array($kureba_abashoferi)) {
-  @$count++;
+  $count++;
 ?>
 <tr>
-  <td><?php echo $count+=0; ?></td>
+  <td><?php echo $count; ?></td>
   <td><?php echo $yose=$shoferi["Emp_Fname"]." ".$shoferi["Emp_Lname"] ?></td>
   <td><?php echo $phoneYe=$shoferi["Emp_Phone"]; ?></td>
   <td><?php echo $shoferi["Emp_Idcard"]; ?></td>
@@ -905,11 +932,12 @@ while ($shoferi=mysqli_fetch_array($kureba_abashoferi)) {
           <th>Action</th>
         </tr>
         <?php
+          $count = 0;
           while ($shoferi=mysqli_fetch_array($kureba_abashoferi)) {
-            @$count++;
+            $count++;
         ?>
             <tr>
-              <td><?php echo $count+=0; ?></td>
+              <td><?php echo $count; ?></td>
               <td><?php echo $yose=$shoferi["Emp_Fname"]." ".$shoferi["Emp_Lname"] ?></td>
               <td><?php echo $phoneYe=$shoferi["Emp_Phone"]; ?></td>
               <td><?php echo $shoferi["Emp_Idcard"]; ?></td>
@@ -959,8 +987,9 @@ while ($shoferi=mysqli_fetch_array($kureba_abashoferi)) {
 <?php
 $allDrivers=mysqli_query($con,"SELECT * FROM employeers WHERE C_Id='$user_id'") or die(mysqli_error($con));
 if(mysqli_num_rows($allDrivers)>0){
+  $count = 0;
   while($driver=mysqli_fetch_assoc($allDrivers)){
-    @$count++;
+    $count++;
 ?>
               <option value="<?php echo $driver['Emp_Id']; ?>" style="background-color: rgb(255, 107, 0);color: black;font-size: 1.4em;border: 2px solid black;"><?php echo "(".$count."). ".$driver["Emp_Phone"]." (".$driver["Emp_Fname"]." ".$driver["Emp_Lname"].")"; ?></option>
 <?php
@@ -986,8 +1015,9 @@ if(mysqli_num_rows($allDrivers)>0){
               $insc="SELECT * FROM cars WHERE C_Id='$user_id'";
               $cars=mysqli_query($con,$insc);
               if(mysqli_num_rows($cars)>0){
+                $count = 0;
                 while($r=mysqli_fetch_array($cars)){
-                  @$count++;
+                  $count++;
                   ?>
                   <option value="<?php echo $r['Car_Id'];?>" style="background-color: rgb(255, 107, 0);color: black;font-size: 1.4em;border: 2px solid black;"> <?php echo "(".$count."). ".$r["Car_Plaque"];?></option>
                   <?php
@@ -1000,8 +1030,9 @@ if(mysqli_num_rows($allDrivers)>0){
 <?php
 $allDestinations = mysqli_query($con, "SELECT L.*,D.* FROM locations L, destination D WHERE L.L_id=D.L_id AND D.C_Id='$user_id' ORDER BY L_from ASC") or die(mysqli_error($con));
 if(mysqli_num_rows($allDestinations)>0){
+  $count = 0;
   while($destination=mysqli_fetch_assoc($allDestinations)){
-    @$count++;
+    $count++;
 ?>
               <option value="<?php echo $destination['D_Id']; ?>" style="background-color: rgb(255, 107, 0);color: black;font-size: 1.4em;border: 2px solid black;"><?php echo "(".$count."). ".$destination["L_from"]." - ".$destination["L_to"].": (Rwf ".$destination["price"].")"; ?></option>
 <?php
@@ -1162,8 +1193,9 @@ while ($myDestination=mysqli_fetch_assoc($showMydestinations)){
 <?php
 $allDestinations = mysqli_query($con, "SELECT * FROM locations ORDER BY L_from ASC") or die(mysqli_error($con));
 if(mysqli_num_rows($allDestinations)>0){
+$count = 0;
 while($destination=mysqli_fetch_assoc($allDestinations)){
-@$count++;
+$count++;
 ?>
           <option value="<?php echo $destination["L_id"] ?>" style="background-color: rgb(255, 107, 0);color: black;font-size: 1.4em;border: 2px solid black;"><?php echo "(".$count."). ".$destination["L_from"]." - ".$destination["L_to"].": (Rwf ".$destination["price"].")"; ?></option>
 <?php
@@ -1242,11 +1274,12 @@ function gusubiraInyuma() {
           <th style="border: 3px solid #111111;">Phone national identity</th>
         </tr>
         <?php
+          $count = 0;
           while ($shoferi=mysqli_fetch_array($kureba_abashoferi)) {
-            @$count++;
+            $count++;
         ?>
             <tr>
-              <td style="border: 2px solid #111111;"><?php echo $count+=0; ?></td>
+              <td style="border: 2px solid #111111;"><?php echo $count; ?></td>
               <td style="border: 2px solid #111111;"><?php echo $yose=$shoferi["Emp_Fname"]." ".$shoferi["Emp_Lname"] ?></td>
               <td style="border: 2px solid #111111;"><?php echo $phoneYe=$shoferi["Emp_Phone"]; ?></td>
               <td style="border: 2px solid #111111;"><?php echo $shoferi["Emp_Idcard"]; ?></td>
@@ -1292,8 +1325,9 @@ function gusubiraInyuma() {
                   <th style="border: 3px solid #111111;">Driver Phone Number</th>
                 </tr>
     <?php
+    $count = 0;
     while($car=mysqli_fetch_assoc($showCars)){
-      @$count++;
+      $count++;
     ?>
                 <tr>
                   <td style="border: 2px solid #111111;"><?php echo $count; ?></td>
@@ -1375,8 +1409,9 @@ function gusubiraInyuma() {
 <?php
 $allDestinations = mysqli_query($con, "SELECT * FROM locations ORDER BY L_from ASC") or die(mysqli_error($con));
 if(mysqli_num_rows($allDestinations)>0){
+  $count = 0;
   while($destination=mysqli_fetch_assoc($allDestinations)){
-    @$count++;
+    $count++;
 ?>
               <option value="<?php echo $destination["L_id"] ?>" style="background-color: rgb(255, 107, 0);color: black;font-size: 1.4em;border: 2px solid black;"><?php echo "(".$count."). ".$destination["L_from"]." - ".$destination["L_to"].": (Rwf ".$destination["price"].")"; ?></option>
 <?php
@@ -1518,40 +1553,42 @@ if(mysqli_num_rows($allDestinations)>0){
       });
 
       const theme = document.querySelector(".theme");
-
-      theme.addEventListener("click", () => {
-        if (document.body.classList != "dark_theme") {
-          theme.innerHTML = "Light Mode";
-          document.body.classList.add("dark_theme");
-          sidebar.classList.remove("active");
-          resBut.innerHTML = "&#9776;";
-        } else {
-          sidebar.classList.remove("active");
-          resBut.innerHTML = "&#9776;";
-          theme.innerHTML = "Dark Mode";
-          document.body.classList.remove("dark_theme");
-        }
-      });
-
-      let selects = document.getElementsByClassName("popupDestination");
-      let country = document.getElementById("destination");
-      const down = document.querySelector(".selections");
-      country.onclick = function () {
-        if (down.classList != "on") {
-          down.classList.toggle("on");
-        }
-      };
-
-      //console.log(selects);
-
-      for (select of selects) {
-        //console.log(select)
-        select.onclick = function () {
-          country.value = this.textContent;
-          if (down.classList != "on") {
-            down.classList.remove("on");
+      if (theme) {
+        theme.addEventListener("click", () => {
+          if (document.body.classList != "dark_theme") {
+            theme.innerHTML = "Light Mode";
+            document.body.classList.add("dark_theme");
+            sidebar.classList.remove("active");
+            resBut.innerHTML = "&#9776;";
+          } else {
+            sidebar.classList.remove("active");
+            resBut.innerHTML = "&#9776;";
+            theme.innerHTML = "Dark Mode";
+            document.body.classList.remove("dark_theme");
           }
-        };
+        });
+      }
+
+      const selects = document.getElementsByClassName("popupDestination");
+      const country = document.getElementById("destination");
+      const down = document.querySelector(".selections");
+      
+      // Only bind handlers when destination controls exist on the current route.
+      if (country) {
+        country.addEventListener("click", function () {
+          if (down) {
+            down.classList.toggle("on");
+          }
+        });
+
+        for (const select of selects) {
+          select.addEventListener("click", function () {
+            country.value = this.textContent;
+            if (down) {
+              down.classList.remove("on");
+            }
+          });
+        }
       }
     </script>
     <script type="text/javascript">				
@@ -1567,51 +1604,86 @@ if(mysqli_num_rows($allDestinations)>0){
 </script>
 <script>
         function validatePassword() {
-            var newPassword = document.getElementById("ibanga2").value;
-            var confirmPassword = document.getElementById("ibanga3").value;
-            if (newPassword !== confirmPassword) {
+            var newPassword = document.getElementById("ibanga2");
+            var confirmPassword = document.getElementById("ibanga3");
+            
+            if (!newPassword || !confirmPassword) {
+                console.error("Password fields not found");
+                return false;
+            }
+            
+            if (newPassword.value !== confirmPassword.value) {
                 alert("New password and confirm new password do not match.");
                 return false;
             }
             return true;
         }
         function togglePasswordVisibility() {
-            const passwords = document.querySelectorAll('input[type="password"], input[type="text"]');
-            passwords.forEach(password => {
-                if (password.type === 'password') {
-                    password.type = 'text';
-                } else {
-                    password.type = 'password';
-                }
+            const passwordFields = document.querySelectorAll('#ibanga1, #ibanga2, #ibanga3');
+            passwordFields.forEach(field => {
+                if (!field) return;
+                field.type = field.type === 'password' ? 'text' : 'password';
             });
         }
     </script>
 <script>
-    document.querySelectorAll('.dropbtn').forEach(button => {
-        button.addEventListener('click', function() {
-            const dropdown = this.parentElement;
-            dropdown.classList.toggle('active');
-            // Close other dropdowns
-            document.querySelectorAll('.dropdown').forEach(otherDropdown => {
-                if (otherDropdown !== dropdown) {
-                    otherDropdown.classList.remove('active');
-                }
-            });
+    const agencyProfileMenu = document.querySelector(".profile-menu");
+    const agencyProfileTrigger = document.querySelector(".profile-trigger");
+    if (agencyProfileMenu && agencyProfileTrigger) {
+        agencyProfileTrigger.addEventListener("click", function(event) {
+            event.stopPropagation();
+            agencyProfileMenu.classList.toggle("open");
+            this.setAttribute("aria-expanded", agencyProfileMenu.classList.contains("open") ? "true" : "false");
         });
-    });
 
-    // Close dropdowns if clicked outside
-    document.addEventListener('click', function(event) {
-        if (!event.target.matches('.dropbtn')) {
-            document.querySelectorAll('.dropdown').forEach(dropdown => {
-                dropdown.classList.remove('active');
-            });
-        }
+        document.addEventListener("click", function(event) {
+            if (!agencyProfileMenu.contains(event.target)) {
+                agencyProfileMenu.classList.remove("open");
+                agencyProfileTrigger.setAttribute("aria-expanded", "false");
+            }
+        });
+    }
+</script>
+<script>
+    // Sidebar dropdown toggle functionality
+    document.addEventListener('DOMContentLoaded', function() {
+        const dropdowns = document.querySelectorAll('.agency_admin_links .dropdown');
+        
+        dropdowns.forEach(dropdown => {
+            const dropbtn = dropdown.querySelector('.dropbtn');
+            
+            if (dropbtn) {
+                dropbtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    // Close all other dropdowns
+                    dropdowns.forEach(other => {
+                        if (other !== dropdown) {
+                            other.classList.remove('active');
+                        }
+                    });
+                    
+                    // Toggle current dropdown
+                    dropdown.classList.toggle('active');
+                });
+            }
+        });
+        
+        // Close dropdowns when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.agency_admin_links')) {
+                dropdowns.forEach(dropdown => {
+                    dropdown.classList.remove('active');
+                });
+            }
+        });
     });
 </script>
 <script src="js/chatbot.js"></script>
   </body>
 </html>
+
 
 
 
